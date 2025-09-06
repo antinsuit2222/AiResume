@@ -151,7 +151,7 @@ I led a dedicated cross-functional team of 5 talented engineers and 2 skilled de
 
         // Generates initial bullet points from a paragraph
         const generateInitialBullets = async (text, count) => {
-            const apiKey = "";
+            const apiKey = "AIzaSyAppbvgqnoGCenMjAIhhTBhmBQA4n3edxY";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
             const systemPrompt = `You are a professional resume writer. Your task is to take the following paragraph and generate exactly ${count} concise, impactful bullet points. Focus on using strong action verbs and quantifying achievements. Do not include periods at the end of each bullet point. Respond only with the bullet points, each on a new line.`;
