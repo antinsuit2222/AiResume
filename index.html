@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .bullet-point {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Container -->
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 w-full max-w-5xl flex flex-col md:flex-row gap-8">
+
+        <!-- Input Section -->
+        <div class="md:w-1/2 space-y-6">
+            <h1 class="text-3xl font-bold text-gray-800 text-center md:text-left">AI Resume Builder</h1>
+            <p class="text-gray-500 text-center md:text-left">
+                Enter your work experience below as a paragraph. Our AI will rephrase and format it into bullet points with consistent length.
+            </p>
+
+            <!-- User Info Form -->
+            <div class="space-y-4">
+                <div>
+                    <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" id="fullName" value="Jane Doe" class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="jobTitle" class="block text-sm font-medium text-gray-700">Job Title</label>
+                    <input type="text" id="jobTitle" value="Senior Product Manager" class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="bulletCount" class="block text-sm font-medium text-gray-700">Number of Bullet Points</label>
+                    <input type="number" id="bulletCount" value="4" min="1" max="10" class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="experience" class="block text-sm font-medium text-gray-700">Work Experience (Paste or type a paragraph)</label>
+                    <textarea id="experience" rows="10" class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+I led a dedicated cross-functional team of 5 talented engineers and 2 skilled designers to develop a completely new mobile application from its initial concept all the way through to a successful launch. This major project resulted in a remarkable 25% increase in user retention within the first quarter after its release. Additionally, I was responsible for managing the product's entire roadmap and backlog, carefully prioritizing features based on extensive market research, direct user feedback, and our overall business goals. My work also involved a lot of analysis of key performance indicators and a commitment to conducting A/B testing to continuously optimize the user flow and improve conversion rates. I also regularly coordinated with all key stakeholders and made sure to communicate project status and key decisions effectively to ensure complete alignment across the entire organization.
+                    </textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <button id="optimizeBtn" class="w-full flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btnText">Optimize with AI</span>
+                    <svg id="loadingSpinner" class="animate-spin h-5 w-5 text-white ml-2 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="text-right text-sm text-gray-500">
+                Credits: <span id="credits">Free</span>
+            </div>
+        </div>
+
+        <!-- Output Section -->
+        <div class="md:w-1/2 p-6 bg-gray-50 rounded-lg shadow-inner overflow-hidden flex flex-col">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">Optimized Resume Preview</h2>
+            <div id="output" class="flex-grow resume-preview p-4 overflow-y-auto space-y-4 rounded-md bg-white border border-gray-200">
+                <div class="text-center mb-6">
+                    <h3 id="outputName" class="text-2xl font-bold text-gray-900"></h3>
+                    <p id="outputJobTitle" class="text-lg text-gray-600"></p>
+                </div>
+                <div id="outputContent" class="space-y-2">
+                    <!-- Optimized content will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal for messages -->
+    <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+            <div class="flex flex-col items-center">
+                <svg id="modalIcon" class="h-10 w-10 text-blue-500 mb-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <h3 id="modalTitle" class="text-lg leading-6 font-medium text-gray-900 text-center">Processing...</h3>
+                <p id="modalMessage" class="mt-2 text-sm text-gray-500 text-center">Please wait while the AI optimizes your resume.</p>
+                <button id="modalCloseBtn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hidden">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const experienceTextarea = document.getElementById('experience');
+        const fullNameInput = document.getElementById('fullName');
+        const jobTitleInput = document.getElementById('jobTitle');
+        const bulletCountInput = document.getElementById('bulletCount');
+        const optimizeBtn = document.getElementById('optimizeBtn');
+        const btnText = document.getElementById('btnText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const outputDiv = document.getElementById('outputContent');
+        const outputName = document.getElementById('outputName');
+        const outputJobTitle = document.getElementById('outputJobTitle');
+        const modal = document.getElementById('modal');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        
+        const MAX_ITERATIONS = 5;
+        const LENGTH_TOLERANCE = 4;
+
+        // Displays a message in the modal
+        const showModal = (title, message, iconType = 'info', showCloseButton = false) => {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalIcon.classList.remove('text-blue-500', 'text-green-500', 'text-red-500');
+            modalIcon.innerHTML = '';
+            if (iconType === 'info') {
+                modalIcon.classList.add('text-blue-500');
+                modalIcon.innerHTML = `<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h.01a1 1 0 100-2H10V9a1 1 0 00-1-1z" clip-rule="evenodd"></path>`;
+            } else if (iconType === 'success') {
+                modalIcon.classList.add('text-green-500');
+                modalIcon.innerHTML = `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>`;
+            } else if (iconType === 'error') {
+                modalIcon.classList.add('text-red-500');
+                modalIcon.innerHTML = `<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h.01a1 1 0 100-2H10V9a1 1 0 00-1-1z" clip-rule="evenodd"></path>`;
+            }
+            modal.classList.remove('hidden');
+            if (showCloseButton) {
+                modalCloseBtn.classList.remove('hidden');
+            } else {
+                modalCloseBtn.classList.add('hidden');
+            }
+        };
+
+        const hideModal = () => {
+            modal.classList.add('hidden');
+        };
+
+        modalCloseBtn.addEventListener('click', hideModal);
+
+        // Generates initial bullet points from a paragraph
+        const generateInitialBullets = async (text, count) => {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const systemPrompt = `You are a professional resume writer. Your task is to take the following paragraph and generate exactly ${count} concise, impactful bullet points. Focus on using strong action verbs and quantifying achievements. Do not include periods at the end of each bullet point. Respond only with the bullet points, each on a new line.`;
+            const userQuery = `Generate ${count} bullet points from this paragraph:\n"${text}"`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                    })
+                });
+                const result = await response.json();
+                const newText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (newText) {
+                    return newText.split('\n').filter(p => p.trim() !== '').map(p => p.trim().replace(/^\*\s*/, '').replace(/\.$/, ''));
+                }
+                return [];
+            } catch (error) {
+                console.error("Initial generation failed:", error);
+                return [];
+            }
+        };
+
+        // Rephrases a single bullet point with a length adjustment
+        const rephraseSingleBullet = async (point, lengthAdjustment) => {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const action = lengthAdjustment > 0 ? "increase" : "reduce";
+            const length = Math.abs(lengthAdjustment);
+            const systemPrompt = `You are a professional resume writer. Please ${action} the resume line length by approximately ${length} characters. The original text is below. Do not include periods. Respond only with the rephrased bullet point.`;
+            const userQuery = `Rephrase this: "${point}"`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                    })
+                });
+                const result = await response.json();
+                const newText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (newText) {
+                    return newText.trim().replace(/^\*\s*/, '').replace(/\.$/, '');
+                }
+                return point;
+            } catch (error) {
+                console.error("Optimization failed:", error);
+                return point;
+            }
+        };
+
+        // Main function to process the resume
+        const processResume = async () => {
+            optimizeBtn.disabled = true;
+            btnText.textContent = "Optimizing...";
+            loadingSpinner.classList.remove('hidden');
+            showModal("Processing...", "Generating initial bullet points from your paragraph.");
+
+            const experienceParagraph = experienceTextarea.value.trim();
+            const bulletCount = parseInt(bulletCountInput.value, 10);
+            
+            const bulletPoints = await generateInitialBullets(experienceParagraph, bulletCount);
+            
+            if (bulletPoints.length !== bulletCount) {
+                showModal("Error", "AI did not return the correct number of bullet points. Please try again.", 'error', true);
+                optimizeBtn.disabled = false;
+                btnText.textContent = "Optimize with AI";
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            renderResume(bulletPoints);
+            
+            optimizeBtn.disabled = false;
+            btnText.textContent = "Optimize with AI";
+            loadingSpinner.classList.add('hidden');
+            showModal("Success!", "Initial bullet points generated. Click 'Optimize Length' on each one to refine.", 'success', true);
+        };
+        
+        // Renders the final resume on the page
+        const renderResume = (points) => {
+            outputName.textContent = fullNameInput.value;
+            outputJobTitle.textContent = jobTitleInput.value;
+            outputDiv.innerHTML = '';
+            
+            points.forEach((point, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center space-x-2';
+                li.innerHTML = `
+                    <svg class="h-2 w-2 text-gray-700" fill="currentColor" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="4" />
+                    </svg>
+                    <span class="text-gray-700 font-medium leading-tight flex-grow mr-4" data-index="${index}">${point}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="char-count text-xs text-gray-400" data-index="${index}">(${point.length} chars)</span>
+                        <input type="number" class="w-20 px-2 py-1 text-sm bg-gray-50 border border-gray-300 rounded-lg text-center" placeholder="Length" data-index="${index}">
+                        <button class="optimize-line-btn px-3 py-1 text-xs font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors" data-index="${index}">Optimize Length</button>
+                    </div>
+                `;
+                outputDiv.appendChild(li);
+            });
+        };
+
+        // Event listener for the main button
+        optimizeBtn.addEventListener('click', processResume);
+        
+        // Event listener for the dynamically created "Optimize Length" buttons
+        outputDiv.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('optimize-line-btn')) {
+                const button = e.target;
+                const index = button.dataset.index;
+                const bulletPointSpan = outputDiv.querySelector(`span[data-index="${index}"]`);
+                const lengthInput = outputDiv.querySelector(`input[data-index="${index}"]`);
+                const charCountSpan = outputDiv.querySelector(`span.char-count[data-index="${index}"]`);
+                
+                const originalText = bulletPointSpan.textContent;
+                const desiredLength = parseInt(lengthInput.value, 10);
+                
+                if (isNaN(desiredLength) || desiredLength <= 0) {
+                    showModal("Invalid Input", "Please enter a valid desired character length.", 'error', true);
+                    return;
+                }
+
+                button.disabled = true;
+                const originalButtonText = button.textContent;
+                button.textContent = "Optimizing...";
+                
+                // Show a spinner on the individual button
+                const spinner = document.createElement('div');
+                spinner.className = 'animate-spin h-4 w-4 text-white ml-2';
+                spinner.innerHTML = `<svg class="opacity-100" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+                button.appendChild(spinner);
+
+                let currentText = originalText;
+                let currentLength = currentText.length;
+                let iteration = 0;
+
+                while (iteration < MAX_ITERATIONS && Math.abs(currentLength - desiredLength) > LENGTH_TOLERANCE) {
+                    const lengthAdjustment = desiredLength - currentLength;
+                    const newText = await rephraseSingleBullet(currentText, lengthAdjustment);
+                    
+                    if (newText && newText !== currentText) {
+                        currentText = newText;
+                        currentLength = currentText.length;
+                        bulletPointSpan.textContent = currentText;
+                        charCountSpan.textContent = `(${currentLength} chars)`;
+                    } else {
+                        // Stop if the AI cannot make further changes
+                        break;
+                    }
+                    iteration++;
+                }
+                
+                button.disabled = false;
+                button.textContent = originalButtonText;
+                spinner.remove();
+                
+                showModal("Optimization Complete!", `Bullet point ${parseInt(index) + 1} has been optimized. Final length: ${currentLength} chars.`, 'success', true);
+            }
+        });
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialPoints = experienceTextarea.value.split('\n').filter(p => p.trim() !== '');
+            renderResume(initialPoints);
+        });
+
+    </script>
+
+</body>
